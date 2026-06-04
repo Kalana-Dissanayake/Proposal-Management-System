@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:3001';
+// Public API calls go to the website's own server (same origin in browser = relative path)
+// In SSR context we need an absolute URL, but from the client a relative path works fine.
+const BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export const api = {
   get: (path: string) => fetch(`${BASE}${path}`).then(r => r.json()),

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { GET as authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Proposal from '@/lib/models/Proposal';
 import fs from 'fs';
 import path from 'path';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions as any);
-  if (!session || !(session as any).user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await dbConnect();
   try {
@@ -21,8 +21,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions as any);
-  if (!session || !(session as any).user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await dbConnect();
   try {

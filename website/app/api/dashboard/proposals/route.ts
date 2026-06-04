@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { GET as authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Proposal from '@/lib/models/Proposal';
 
-export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions as any);
-  if (!session || !(session as any).user) {
+export async function GET(_req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
