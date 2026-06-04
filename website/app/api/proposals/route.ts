@@ -15,7 +15,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions as any);
-  if (!session || !session.user) {
+  if (!session || !(session as any).user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

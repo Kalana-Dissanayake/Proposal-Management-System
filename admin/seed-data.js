@@ -23,7 +23,9 @@ const ContactMessageSchema = new mongoose.Schema({
 const GrantSchema = new mongoose.Schema({
   title: { type: String },
   description: { type: String },
-  amount: { type: Number },
+  fundingAmount: { type: Number },
+  fundingBody: { type: String },
+  researchArea: { type: String },
   deadline: { type: Date },
   status: { type: String, default: 'open' },
   createdAt: { type: Date, default: Date.now },
@@ -64,19 +66,14 @@ async function seed() {
 
     // 2. Contact Messages
     await ContactMessage.deleteMany({});
-    await ContactMessage.insertMany([
-      { name: 'John Doe', email: 'john@example.com', subject: 'Grant Inquiry', message: 'I have a question about the AI grant.', isRead: false },
-      { name: 'Jane Smith', email: 'jane@example.com', subject: 'Platform Support', message: 'How do I submit my proposal?', isRead: true },
-      { name: 'Robert Johnson', email: 'robert@example.com', subject: 'Feedback', message: 'Great portal!', isRead: false }
-    ]);
-    console.log('Contact messages created');
+    console.log('Contact messages cleared');
 
     // 3. Grants
     await Grant.deleteMany({});
     await Grant.insertMany([
-      { title: 'AI Research Excellence Grant', description: 'Funding for advanced artificial intelligence research.', amount: 150000, deadline: new Date('2026-12-31'), status: 'open' },
-      { title: 'Renewable Energy Innovation', description: 'Supporting sustainable energy technologies.', amount: 200000, deadline: new Date('2026-10-15'), status: 'open' },
-      { title: 'Biomedical Science Fellowship', description: 'Research into new medical treatments.', amount: 75000, deadline: new Date('2026-08-01'), status: 'closed' }
+      { title: 'AI Research Excellence Grant', description: 'Funding for advanced artificial intelligence research.', fundingAmount: 150000, fundingBody: 'National Science Foundation', deadline: new Date('2026-12-31'), status: 'open', researchArea: 'Artificial Intelligence' },
+      { title: 'Renewable Energy Innovation', description: 'Supporting sustainable energy technologies.', fundingAmount: 200000, fundingBody: 'Department of Energy', deadline: new Date('2026-10-15'), status: 'open', researchArea: 'Renewable Energy' },
+      { title: 'Biomedical Science Fellowship', description: 'Research into new medical treatments.', fundingAmount: 75000, fundingBody: 'Health Institute', deadline: new Date('2026-08-01'), status: 'closed', researchArea: 'Biomedical Science' }
     ]);
     console.log('Grants created');
 

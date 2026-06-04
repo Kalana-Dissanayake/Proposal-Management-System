@@ -8,8 +8,9 @@ export async function GET() {
   try {
     const proposalAreas = await Proposal.distinct('researchArea');
     const grantAreas = await Grant.distinct('researchArea');
+    const staticAreas = ['Artificial Intelligence', 'Biomedical Science', 'Renewable Energy', 'Climate Change', 'Quantum Computing', 'Data Science', 'Nanotechnology', 'Space Exploration'];
     
-    const allAreas = [...proposalAreas, ...grantAreas];
+    const allAreas = [...proposalAreas, ...grantAreas, ...staticAreas];
     const uniqueAreas = Array.from(new Set(allAreas))
       .filter((area) => typeof area === 'string' && area.trim().length > 0)
       .sort((a, b) => a.localeCompare(b));

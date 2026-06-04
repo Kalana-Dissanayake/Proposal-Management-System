@@ -6,7 +6,7 @@ import Proposal from '@/lib/models/Proposal';
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions as any);
-  if (!session || !session.user) {
+  if (!session || !(session as any).user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
