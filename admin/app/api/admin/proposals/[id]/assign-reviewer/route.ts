@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { verifyAdminToken } from '@/lib/auth';
 import Proposal from '@/lib/models/Proposal';
-import Researcher from '@/lib/models/Researcher';
+import Reviewer from '@/lib/models/Reviewer';
 import Review from '@/lib/models/Review';
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
@@ -13,7 +13,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     const { reviewerId } = await req.json();
     
-    const reviewer = await Researcher.findById(reviewerId);
+    const reviewer = await Reviewer.findById(reviewerId);
     if (!reviewer) {
       return NextResponse.json({ error: 'Reviewer not found' }, { status: 404 });
     }

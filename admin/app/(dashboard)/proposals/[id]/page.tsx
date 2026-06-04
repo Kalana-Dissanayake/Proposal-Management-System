@@ -36,7 +36,7 @@ export default function ProposalDetailPage() {
         
         <div className="grid grid-cols-2 gap-y-6 gap-x-12 mt-8 text-sm">
           <div>
-            <p className="text-gray-500 uppercase tracking-wide font-medium text-xs mb-1">Researcher</p>
+            <p className="text-gray-500 uppercase tracking-wide font-medium text-xs mb-1">Submitter</p>
             <p className="font-medium text-gray-900">{data.researcherName}</p>
             <p className="text-gray-500">{data.researcherEmail}</p>
           </div>
@@ -60,21 +60,16 @@ export default function ProposalDetailPage() {
 
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Abstract</h3>
-            <p className="text-gray-700 whitespace-pre-wrap">{data.abstract}</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Detailed Proposal</h3>
+            {data.detailedProposalFile ? (
+              <a href={`http://localhost:3000${data.detailedProposalFile}`} target="_blank" rel="noreferrer" className="inline-flex items-center space-x-2 text-indigo-600 hover:text-indigo-800 font-medium bg-indigo-50 px-4 py-2 rounded-lg transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                <span>Download Proposal Document</span>
+              </a>
+            ) : (
+              <p className="text-gray-500 italic">No document attached.</p>
+            )}
           </div>
-          {data.objectives && (
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Objectives</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{data.objectives}</p>
-            </div>
-          )}
-          {data.methodology && (
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Methodology</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{data.methodology}</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

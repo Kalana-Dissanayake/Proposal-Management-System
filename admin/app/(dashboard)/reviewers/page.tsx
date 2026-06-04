@@ -4,7 +4,7 @@ import DataTable from '@/components/DataTable';
 import Modal from '@/components/Modal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
-export default function ResearchersPage() {
+export default function ReviewersPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -18,7 +18,7 @@ export default function ResearchersPage() {
 
   const fetchData = (query = '') => {
     setLoading(true);
-    fetch(`/api/admin/researchers?search=${query}`)
+    fetch(`/api/admin/reviewers?search=${query}`)
       .then(res => res.json())
       .then(d => {
         if (d.success) setData(d.data);
@@ -38,7 +38,7 @@ export default function ResearchersPage() {
       researchAreas: formData.researchAreas.split(',').map(s => s.trim()).filter(Boolean)
     };
 
-    const url = editingId ? `/api/admin/researchers/${editingId}` : '/api/admin/researchers';
+    const url = editingId ? `/api/admin/reviewers/${editingId}` : '/api/admin/reviewers';
     const method = editingId ? 'PUT' : 'POST';
 
     await fetch(url, {
@@ -53,7 +53,7 @@ export default function ResearchersPage() {
 
   const handleDelete = async () => {
     if (!deletingId) return;
-    await fetch(`/api/admin/researchers/${deletingId}`, { method: 'DELETE' });
+    await fetch(`/api/admin/reviewers/${deletingId}`, { method: 'DELETE' });
     fetchData(search);
   };
 
@@ -83,8 +83,8 @@ export default function ResearchersPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Researchers</h1>
-        <button onClick={openAdd} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700">Add Researcher</button>
+        <h1 className="text-3xl font-bold text-gray-900">Reviewers</h1>
+        <button onClick={openAdd} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700">Add Reviewer</button>
       </div>
 
       <div className="flex items-center space-x-4 mb-6">
@@ -120,7 +120,7 @@ export default function ResearchersPage() {
         )}
       />
 
-      <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)} title={editingId ? "Edit Researcher" : "Add Researcher"}>
+      <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)} title={editingId ? "Edit Reviewer" : "Add Reviewer"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Name *</label><input required className="w-full border border-gray-300 rounded-lg px-3 py-2" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Email *</label><input required type="email" className="w-full border border-gray-300 rounded-lg px-3 py-2" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
@@ -140,7 +140,7 @@ export default function ResearchersPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog isOpen={isConfirmOpen} onClose={() => setConfirmOpen(false)} message="Are you sure you want to delete this researcher?" onConfirm={handleDelete} />
+      <ConfirmDialog isOpen={isConfirmOpen} onClose={() => setConfirmOpen(false)} message="Are you sure you want to delete this reviewer?" onConfirm={handleDelete} />
     </div>
   );
 }

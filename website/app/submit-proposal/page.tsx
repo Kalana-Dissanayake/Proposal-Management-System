@@ -1,8 +1,12 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function SubmitProposalPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  
   const [areas, setAreas] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -10,24 +14,38 @@ export default function SubmitProposalPage() {
 
   const [formData, setFormData] = useState({
     title: '',
-    researcherName: '',
-    researcherEmail: '',
     researchArea: '',
-    abstract: '',
-    objectives: '',
-    methodology: '',
     budget: '',
     duration: ''
   });
+  const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
-    api.get('/api/public/research-areas').then(res => {
-      if (res.success) setAreas(res.data || res.areas);
-    });
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    // We can still fetch research areas from the public API or admin API
+    fetch('/api/public/research-areas').then(res => res.json()).then(res => {
+      if (res.success) setAreas(res.data || res.areas || []);
+    }).catch(() => {});
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  if (status === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  if (!session) return null;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,25 +53,31 @@ export default function SubmitProposalPage() {
     setLoading(true);
     setError('');
 
-    if (formData.abstract.length < 100) {
-      setError('Abstract must be at least 100 characters long.');
+    if (!file) {
+      setError('Please attach a detailed proposal file.');
       setLoading(false);
       return;
     }
 
-    try {
-      const payload = {
-        ...formData,
-        budget: Number(formData.budget)
-      };
+    const payload = new FormData();
+    payload.append('title', formData.title);
+    payload.append('budget', formData.budget);
+    payload.append('duration', formData.duration);
+    payload.append('researchArea', formData.researchArea);
+    payload.append('detailedProposalFile', file);
 
-      const res = await api.post('/api/public/proposals', payload);
+    try {
+      const res = await fetch('/api/proposals', {
+        method: 'POST',
+        body: payload, // FormData automatically sets multipart/form-data
+      });
       
-      if (res.success) {
-        setSuccessId(res.proposalId);
-        setFormData({ title: '', researcherName: '', researcherEmail: '', researchArea: '', abstract: '', objectives: '', methodology: '', budget: '', duration: '' });
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setSuccessId(data.proposalId);
       } else {
-        setError(res.error || 'Failed to submit proposal');
+        setError(data.error || 'Failed to submit proposal');
       }
     } catch (err: any) {
       setError('An unexpected error occurred. Please try again later.');
@@ -75,8 +99,8 @@ export default function SubmitProposalPage() {
           <p className="text-2xl font-mono font-bold text-indigo-700">{successId}</p>
         </div>
         <div>
-          <button onClick={() => setSuccessId(null)} className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-sm">
-            Submit Another Proposal
+          <button onClick={() => { setSuccessId(null); setFile(null); setFormData({ title: '', researchArea: '', budget: '', duration: '' }); router.push('/dashboard'); }} className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-sm">
+            Go to Dashboard
           </button>
         </div>
       </div>
@@ -92,21 +116,6 @@ export default function SubmitProposalPage() {
 
       <div className="max-w-3xl mx-auto px-4 pb-20 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="space-y-8">
-          
-          <div className="bg-white shadow-sm border border-gray-100 rounded-2xl p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Investigator Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Full Name *</label>
-                <input required name="researcherName" value={formData.researcherName} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Dr. Jane Doe" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Email Address *</label>
-                <input required type="email" name="researcherEmail" value={formData.researcherEmail} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="jane@university.edu" />
-              </div>
-            </div>
-          </div>
-
           <div className="bg-white shadow-sm border border-gray-100 rounded-2xl p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Project Overview</h2>
             <div className="space-y-6">
@@ -138,22 +147,11 @@ export default function SubmitProposalPage() {
           </div>
 
           <div className="bg-white shadow-sm border border-gray-100 rounded-2xl p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Detailed Proposal</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Detailed Proposal Attachment</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Abstract * <span className="text-gray-400 font-normal">(min 100 chars)</span></label>
-                <textarea required name="abstract" value={formData.abstract} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none min-h-[150px]" placeholder="Provide a comprehensive summary of your research proposal..."></textarea>
-                <p className="text-xs text-right text-gray-500 mt-1">{formData.abstract.length}/100 chars minimum</p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Objectives</label>
-                <textarea name="objectives" value={formData.objectives} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none min-h-[120px]" placeholder="What are the specific goals of this research?"></textarea>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Methodology</label>
-                <textarea name="methodology" value={formData.methodology} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none min-h-[120px]" placeholder="How will you conduct this research?"></textarea>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Upload Proposal Document (PDF or Word, max 5MB) *</label>
+                <input required type="file" accept=".pdf,.doc,.docx" onChange={handleFileChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
               </div>
             </div>
           </div>

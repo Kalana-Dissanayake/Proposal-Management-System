@@ -12,7 +12,7 @@ export default function ProposalsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const [researchers, setResearchers] = useState<any[]>([]);
+  const [reviewers, setReviewers] = useState<any[]>([]);
   const [isAssignOpen, setAssignOpen] = useState(false);
   const [assigningProposalId, setAssigningProposalId] = useState<string | null>(null);
   const [selectedReviewer, setSelectedReviewer] = useState('');
@@ -32,10 +32,10 @@ export default function ProposalsPage() {
 
   useEffect(() => { fetchData(); }, [page, statusFilter]);
 
-  const loadResearchers = () => {
-    fetch('/api/admin/researchers')
+  const loadReviewers = () => {
+    fetch('/api/admin/reviewers')
       .then(res => res.json())
-      .then(d => { if (d.success) setResearchers(d.data.filter((r: any) => r.status === 'active')); });
+      .then(d => { if (d.success) setReviewers(d.data.filter((r: any) => r.status === 'active')); });
   };
 
   const updateStatus = async (id: string, status: string) => {
@@ -58,7 +58,7 @@ export default function ProposalsPage() {
     fetchData();
   };
 
-  const columns = ['Title', 'Researcher', 'Email', 'Status', 'Submitted Date', 'Actions'];
+  const columns = ['Title', 'Submitter', 'Email', 'Status', 'Submitted Date', 'Actions'];
 
   return (
     <div className="space-y-6">
@@ -94,7 +94,7 @@ export default function ProposalsPage() {
                 <>
                   <button onClick={() => { updateStatus(row._id, 'approved'); }} className="text-green-600 hover:text-green-900">Approve</button>
                   <button onClick={() => { updateStatus(row._id, 'rejected'); }} className="text-red-600 hover:text-red-900">Reject</button>
-                  <button onClick={() => { setAssigningProposalId(row._id); loadResearchers(); setAssignOpen(true); }} className="text-blue-600 hover:text-blue-900">Assign Reviewer</button>
+                  <button onClick={() => { setAssigningProposalId(row._id); loadReviewers(); setAssignOpen(true); }} className="text-blue-600 hover:text-blue-900">Assign Reviewer</button>
                 </>
               )}
             </td>
@@ -117,7 +117,7 @@ export default function ProposalsPage() {
             onChange={e => setSelectedReviewer(e.target.value)}
           >
             <option value="">-- Select --</option>
-            {researchers.map(r => <option key={r._id} value={r._id}>{r.name} ({r.email})</option>)}
+            {reviewers.map(r => <option key={r._id} value={r._id}>{r.name} ({r.email})</option>)}
           </select>
           <button onClick={assignReviewer} disabled={!selectedReviewer} className="w-full bg-indigo-600 text-white py-2 rounded-lg mt-4 disabled:opacity-50 hover:bg-indigo-700">Assign</button>
         </div>

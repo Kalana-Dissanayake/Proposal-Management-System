@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import AdminUser from '@/lib/models/AdminUser';
+import Reviewer from '@/lib/models/Reviewer';
 import Researcher from '@/lib/models/Researcher';
 import Grant from '@/lib/models/Grant';
 import Proposal from '@/lib/models/Proposal';

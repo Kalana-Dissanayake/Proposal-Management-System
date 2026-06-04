@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { verifyAdminToken } from '@/lib/auth';
+import Reviewer from '@/lib/models/Reviewer';
 import Researcher from '@/lib/models/Researcher';
 import Proposal from '@/lib/models/Proposal';
 import Grant from '@/lib/models/Grant';
@@ -15,12 +16,12 @@ export async function GET(req: NextRequest) {
 
   try {
     const [
-      totalResearchers, totalProposals, pendingProposals,
+      totalReviewers, totalProposals, pendingProposals,
       approvedProposals, rejectedProposals, underReviewProposals,
       totalGrants, openGrants, totalReviews, unreadMessages,
       recentProposals, recentMessages
     ] = await Promise.all([
-      Researcher.countDocuments(),
+      Reviewer.countDocuments(),
       Proposal.countDocuments(),
       Proposal.countDocuments({ status: 'pending' }),
       Proposal.countDocuments({ status: 'approved' }),
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        totalResearchers, totalProposals, pendingProposals,
+        totalReviewers, totalProposals, pendingProposals,
         approvedProposals, rejectedProposals, underReviewProposals,
         totalGrants, openGrants, totalReviews, unreadMessages,
         recentProposals, recentMessages

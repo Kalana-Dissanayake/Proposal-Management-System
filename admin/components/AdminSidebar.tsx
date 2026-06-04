@@ -24,7 +24,7 @@ export default function AdminSidebar() {
 
   const links = [
     { name: 'Dashboard', path: '/' },
-    { name: 'Researchers', path: '/researchers' },
+    { name: 'Reviewers', path: '/reviewers' },
     { name: 'Proposals', path: '/proposals' },
     { name: 'Grants', path: '/grants' },
     { name: 'Reviews', path: '/reviews' },
