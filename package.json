@@ -1,0 +1,14 @@
+{
+  "name": "proposal-management-system",
+  "version": "1.0.0",
+  "description": "Research Grant & Proposal Management System",
+  "scripts": {
+    "dev:admin": "npm run dev --prefix admin",
+    "dev:website": "npm run dev --prefix website",
+    "dev": "npm run dev:admin & npm run dev:website",
+    "build:admin": "npm run build --prefix admin",
+    "build:website": "npm run build --prefix website",
+    "build": "npm run build:admin && npm run build:website",
+    "install:all": "npm install --prefix admin && npm install --prefix website"
+  }
+}
