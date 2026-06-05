@@ -2,6 +2,44 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+  LayoutDashboard, Users, UserCheck, FileText, Award,
+  ClipboardCheck, BarChart2, Mail, Download, Settings,
+  LogOut, ChartNoAxesColumn,
+} from 'lucide-react';
+
+const navSections = [
+  {
+    label: 'Main',
+    items: [
+      { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Management',
+    items: [
+      { name: 'Researchers', path: '/researchers', icon: Users },
+      { name: 'Reviewers',   path: '/reviewers',   icon: UserCheck },
+      { name: 'Proposals',   path: '/proposals',   icon: FileText },
+      { name: 'Grants',      path: '/grants',      icon: Award },
+      { name: 'Reviews',     path: '/reviews',     icon: ClipboardCheck },
+    ],
+  },
+  {
+    label: 'Analytics',
+    items: [
+      { name: 'Reports',  path: '/reports',  icon: BarChart2 },
+      { name: 'Messages', path: '/messages', icon: Mail, badge: true },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { name: 'Export Data', path: '/export',   icon: Download },
+      { name: 'Settings',    path: '/settings', icon: Settings },
+    ],
+  },
+];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -11,9 +49,7 @@ export default function AdminSidebar() {
   useEffect(() => {
     fetch('/api/admin/dashboard')
       .then(res => res.json())
-      .then(d => {
-        if (d.success) setUnreadCount(d.data.unreadMessages);
-      })
+      .then(d => { if (d.success) setUnreadCount(d.data.unreadMessages); })
       .catch(() => {});
   }, []);
 
@@ -22,39 +58,72 @@ export default function AdminSidebar() {
     router.push('/login');
   };
 
-  const links = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Reviewers', path: '/reviewers' },
-    { name: 'Proposals', path: '/proposals' },
-    { name: 'Grants', path: '/grants' },
-    { name: 'Reviews', path: '/reviews' },
-    { name: 'Reports', path: '/reports' },
-    { name: 'Messages', path: '/messages', badge: unreadCount },
-  ];
+  const isActive = (path: string) =>
+    path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(path + '/');
 
   return (
-    <div className="w-64 bg-indigo-900 text-white flex flex-col h-screen sticky top-0 hidden md:flex">
-      <div className="p-6">
-        <h1 className="text-2xl font-bold tracking-tight">GrantAdmin</h1>
+    <aside className="w-[220px] min-h-screen bg-[#1e1b4b] flex flex-col flex-shrink-0">
+      {/* Brand */}
+      <div className="p-4 border-b border-white/10 flex items-center gap-2.5">
+        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+          <ChartNoAxesColumn size={16} className="text-white" />
+        </div>
+        <span className="text-white font-semibold text-[15px] tracking-tight">GrantAdmin</span>
       </div>
-      <nav className="flex-1 px-4 space-y-2 mt-4">
-        {links.map(link => {
-          const isActive = pathname === link.path || (link.path !== '/' && pathname.startsWith(link.path));
-          return (
-            <Link key={link.path} href={link.path} className={`flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-indigo-800 text-white font-medium' : 'text-indigo-200 hover:bg-indigo-800/50 hover:text-white'}`}>
-              <span>{link.name}</span>
-              {link.badge !== undefined && link.badge > 0 && (
-                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{link.badge}</span>
-              )}
-            </Link>
-          );
-        })}
+
+      {/* Nav */}
+      <nav className="flex-1 py-2 overflow-y-auto">
+        {navSections.map(section => (
+          <div key={section.label} className="mb-1">
+            <p className="px-4 pt-3 pb-1 text-[10px] text-white/35 uppercase tracking-widest font-medium">
+              {section.label}
+            </p>
+            {section.items.map(item => {
+              const active = isActive(item.path);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`flex items-center gap-2.5 px-3 py-2 mx-2 rounded-lg text-[13px] transition-colors ${
+                    active
+                      ? 'bg-indigo-500/30 text-white font-medium'
+                      : 'text-white/60 hover:bg-white/8 hover:text-white'
+                  }`}
+                >
+                  <Icon size={15} className="flex-shrink-0" />
+                  <span className="flex-1">{item.name}</span>
+                  {item.badge && unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
-      <div className="p-4 border-t border-indigo-800">
-        <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-lg text-indigo-200 hover:bg-indigo-800 hover:text-white transition-colors">
-          Logout
-        </button>
+
+      {/* Profile footer */}
+      <div className="p-3 border-t border-white/10">
+        <div className="flex items-center gap-2 p-2">
+          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">
+            SA
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-[12px] font-medium truncate">Super Admin</p>
+            <p className="text-white/40 text-[10px] truncate">admin@admin.com</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            className="text-white/40 hover:text-red-400 transition-colors p-1"
+          >
+            <LogOut size={14} />
+          </button>
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }

@@ -16,11 +16,12 @@ export async function GET(req: NextRequest) {
 
   try {
     const [
-      totalReviewers, totalProposals, pendingProposals,
+      totalResearchers, totalReviewers, totalProposals, pendingProposals,
       approvedProposals, rejectedProposals, underReviewProposals,
       totalGrants, openGrants, totalReviews, unreadMessages,
       recentProposals, recentMessages
     ] = await Promise.all([
+      Researcher.countDocuments(),
       Reviewer.countDocuments(),
       Proposal.countDocuments(),
       Proposal.countDocuments({ status: 'pending' }),
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        totalReviewers, totalProposals, pendingProposals,
+        totalResearchers, totalReviewers, totalProposals, pendingProposals,
         approvedProposals, rejectedProposals, underReviewProposals,
         totalGrants, openGrants, totalReviews, unreadMessages,
         recentProposals, recentMessages
