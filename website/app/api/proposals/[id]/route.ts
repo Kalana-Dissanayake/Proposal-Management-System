@@ -4,8 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Proposal from '@/lib/models/Proposal';
-import fs from 'fs';
-import path from 'path';
+import { del } from '@vercel/blob';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -33,11 +32,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Can only delete pending proposals' }, { status: 400 });
     }
     
-    // Attempt to delete file
-    if (proposal.detailedProposalFile) {
-      const filePath = path.join(process.cwd(), 'public', proposal.detailedProposalFile);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+    // Delete file from Vercel Blob if it's a blob URL
+    if (proposal.detailedProposalFile && proposal.detailedProposalFile.startsWith('https://')) {
+      try {
+        await del(proposal.detailedProposalFile);
+      } catch (e) {
+        // Non-fatal: proceed even if blob deletion fails
+        console.warn('Could not delete blob:', e);
       }
     }
 

@@ -4,8 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Proposal from '@/lib/models/Proposal';
-import fs from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
@@ -41,16 +40,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File size exceeds 5MB limit.' }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'proposals');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${file.name.replace(/\s+/g, '-')}`;
-    const filePath = path.join(uploadDir, uniqueFilename);
-    
-    fs.writeFileSync(filePath, buffer);
+    // Upload to Vercel Blob (works on serverless — no filesystem needed)
+    const uniqueFilename = `proposals/${Date.now()}-${Math.round(Math.random() * 1e9)}-${file.name.replace(/\s+/g, '-')}`;
+    const blob = await put(uniqueFilename, file, {
+      access: 'public',
+      contentType: file.type,
+    });
 
     await dbConnect();
 
@@ -62,7 +57,7 @@ export async function POST(req: NextRequest) {
       budget: Number(budget),
       duration,
       researchArea,
-      detailedProposalFile: `/uploads/proposals/${uniqueFilename}`,
+      detailedProposalFile: blob.url,  // store the Blob CDN URL
       status: 'pending'
     });
 
